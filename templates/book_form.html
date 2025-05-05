@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if book %}Edit{% else %}New{% endif %} Book{% endblock %}
+
+{% block content %}
+    <h1>{% if book %}Edit{% else %}Add New{% endif %} Book</h1>
+    
+    <form method="post" class="mb-4">
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="title" class="form-label">Title</label>
+                    <input type="text" class="form-control" id="title" name="title" value="{{ book.title if book else '' }}" required>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="isbn" class="form-label">ISBN</label>
+                    <input type="text" class="form-control" id="isbn" name="isbn" value="{{ book.isbn if book else '' }}" required>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="publisher" class="form-label">Publisher</label>
+                    <select class="form-select" id="publisher" name="publisher" required>
+                        <option value="" disabled {% if not book %}selected{% endif %}>Select Publisher</option>
+                        {% for publisher in publishers %}
+                            <option value="{{ publisher.id }}" {% if book and book.publisher_id == publisher.id %}selected{% endif %}>
+                                {{ publisher.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="publication_date" class="form-label">Publication Date</label>
+                    <input type="date" class="form-control" id="publication_date" name="publication_date" 
+                           value="{{ book.publication_date.strftime('%Y-%m-%d') if book and book.publication_date else '' }}">
+                </div>
+            </div>
+        </div>
+        
+        <div class="mb-3">
+            <label for="copies_available" class="form-label">Copies Available</label>
+            <input type="number" class="form-control" id="copies_available" name="copies_available" 
+                   value="{{ book.copies_available if book else '1' }}" min="0" required>
+        </div>
+        
+        <div class="mb-3">
+            <label class="form-label">Authors</label>
+            <div class="row">
+                {% for author in authors %}
+                    <div class="col-md-4 mb-2">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="{{ author.id }}" 
+                                   id="author{{ author.id }}" name="authors" 
+                                   {% if book and author in book.authors %}checked{% endif %}>
+                            <label class="form-check-label" for="author{{ author.id }}">
+                                {{ author.name }}
+                            </label>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="mb-3">
+            <label class="form-label">Genres</label>
+            <div class="row">
+                {% for genre in genres %}
+                    <div class="col-md-4 mb-2">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="{{ genre.id }}" 
+                                   id="genre{{ genre.id }}" name="genres" 
+                                   {% if book and genre in book.genres %}checked{% endif %}>
+                            <label class="form-check-label" for="genre{{ genre.id }}">
+                                {{ genre.name }}
+                            </label>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary">Save</button>
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+{% endblock %}
