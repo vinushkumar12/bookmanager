@@ -63,7 +63,6 @@ class Publisher(db.Model):
 
     def __repr__(self):
         return f'<Publisher {self.name}>'
-
 # Create database indexes
 Index('ix_book_title', Book.title)
 Index('ix_book_isbn', Book.isbn, unique=True)  # Although already unique by constraint
@@ -118,12 +117,30 @@ STORED_PROCEDURES = [
 # Routes
 @app.route('/')
 def index():
-    # Using prepared statement with SQLAlchemy Core
     stmt = select(Book).order_by(Book.title)
+    
+    count_books_stmt = text("SELECT COUNT(*) FROM book")
+    count_authors_stmt = text("SELECT COUNT(*) FROM author")
+    count_genres_stmt = text("SELECT COUNT(*) FROM genre")
+    count_publishers_stmt = text("SELECT COUNT(*) FROM publisher")
+
     with db.engine.connect() as conn:
-        result = conn.execute(stmt)
-        books = result.all()
-    return render_template('index.html', books=books)
+        books = conn.execute(stmt).all()
+        total_books = conn.execute(count_books_stmt).scalar()
+        total_authors = conn.execute(count_authors_stmt).scalar()
+        total_genres = conn.execute(count_genres_stmt).scalar()
+        total_publishers = conn.execute(count_publishers_stmt).scalar()
+
+    return render_template(
+        'index.html',
+        books=books,
+        total_books=total_books,
+        total_authors=total_authors,
+        total_genres=total_genres,
+        total_publishers=total_publishers,
+        page_type='books'
+    )
+
 
 @app.route('/book/search', methods=['GET', 'POST'])
 def search_books():
